@@ -14,10 +14,11 @@ const port = 3000;
 /**
  *  --------- Routes -------------
  */
-app.get("/", (req, res) => {
-  res.send("Hello!");
-});
+const indexRouter = require("./routes/index");
+const usersRouter = require("./routes/users");
 
+app.use("/", indexRouter);
+app.use("/users", usersRouter);
 /**
  *  ------ Server --------
  */
