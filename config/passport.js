@@ -7,12 +7,15 @@ const User = require("../models/user");
 
 passport.use(
   new localStrategy((username, password, done) => {
-    User.findOne({ username }, (err, user) => {
+    User.findOne({ username }, async (err, user) => {
       if (err) return done(err);
 
       if (!user) return done(null, false, { message: "User not found" });
 
-      if (password !== user.password) {
+      // Call userSchema method to check password
+      const validPassword = await user.isValidPassword(password);
+
+      if (!validPassword) {
         return done(null, false, { message: "Incorrect password" });
       }
 

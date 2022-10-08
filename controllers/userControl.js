@@ -3,7 +3,6 @@ const jwt = require("jsonwebtoken");
 const { body, validationResult } = require("express-validator");
 
 const User = require("../models/user");
-const { session } = require("passport");
 
 /**
  * ------- GET Logic ----------
@@ -36,20 +35,20 @@ exports.signup_POST = [
 
     if (!errors.isEmpty()) return res.json({ error: errors });
 
-    User.findOne({ username: req.body.username }, async (err, found_user) => {
+    User.findOne({ username: req.body.username }, (err, found_user) => {
       if (err) return res.json({ error: err });
 
       if (found_user) return res.json({ message: "User already exist" });
 
-      const user = await User.create(
-        {
-          username: req.body.username,
-          password: req.body.password,
-        },
-        (err) => {
-          if (err) return next(err);
-        }
-      );
+      const user = new User({
+        username: req.body.username,
+        password: req.body.password,
+      });
+
+      // Password secured logic in userSchema
+      user.save((err) => {
+        if (err) return next(err);
+      });
 
       return res.json({ message: "SignUp Success", user });
     });
