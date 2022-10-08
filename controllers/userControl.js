@@ -1,6 +1,17 @@
+const passport = require("passport");
+const jwt = require("jsonwebtoken");
 const { body, validationResult } = require("express-validator");
 
 const User = require("../models/user");
+const { session } = require("passport");
+
+/**
+ * ------- GET Logic ----------
+ */
+
+exports.profile_GET = (req, res, next) => {
+  return res.json({ message: "Success Profile Page" });
+};
 
 /**
  *  ------ POST Logic ---------
@@ -30,12 +41,38 @@ exports.signup_POST = [
 
       if (found_user) return res.json({ message: "User already exist" });
 
-      const new_user = await User.create({
-        username: req.body.username,
-        password: req.body.password,
-      });
+      const user = await User.create(
+        {
+          username: req.body.username,
+          password: req.body.password,
+        },
+        (err) => {
+          if (err) return next(err);
+        }
+      );
 
-      return res.json({ message: "SignUp Success", new_user });
+      return res.json({ message: "SignUp Success", user });
     });
   },
 ];
+
+exports.login_POST = (req, res, next) => {
+  passport.authenticate("local", { session: false }, (err, user, info) => {
+    if (err || !user) {
+      return res.status(400).json({
+        message: "Something is not right",
+        err,
+        user,
+      });
+    }
+
+    req.login(user, { session: false }, (err) => {
+      if (err) {
+        res.json(err);
+      }
+
+      const token = jwt.sign({ user }, "SECRET", { expiresIn: "5m" });
+      return res.json({ user, token });
+    });
+  })(req, res);
+};
