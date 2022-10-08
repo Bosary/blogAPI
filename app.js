@@ -19,10 +19,11 @@ app.use(express.urlencoded({ extended: false }));
 /**
  *  --------- Routes -------------
  */
-const indexRouter = require("./routes/index");
-const usersRouter = require("./routes/users");
 
-app.use("/", indexRouter);
+const usersRouter = require("./routes/users");
+const postsRouter = require("./routes/posts");
+
+app.use("/", postsRouter);
 app.use("/users", usersRouter);
 /**
  *  ------ Server --------

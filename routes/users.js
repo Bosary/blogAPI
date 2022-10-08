@@ -24,4 +24,14 @@ router.post("/signup", UserControl.signup_POST);
 
 router.post("/login", UserControl.login_POST);
 
+/*
+---Need to check how to destroy jwt token on logout---
+
+router.post(
+  "/logout",
+  passport.authenticate("jwt", { session: false }),
+  UserControl.logout_POST
+);
+*/
+
 module.exports = router;

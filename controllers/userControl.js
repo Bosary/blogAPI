@@ -75,3 +75,16 @@ exports.login_POST = (req, res, next) => {
     });
   })(req, res);
 };
+
+/*
+
+---Need to check how to destroy jwt token on logout---
+
+exports.logout_POST = (req, res, next) => {
+  req.logout((err) => {
+    if (err) return next(err);
+
+    res.json({ message: "success logout" });
+  });
+};
+*/
