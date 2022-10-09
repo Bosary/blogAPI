@@ -16,6 +16,8 @@ const userSchema = new mongoose.Schema({
     required: true,
     minLength: 3,
   },
+  posts: [{ type: mongoose.Schema.Types.ObjectId, ref: "Post" }],
+  comments: [{ type: mongoose.Schema.Types.ObjectId, ref: "Comment" }],
 });
 
 /**

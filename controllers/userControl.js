@@ -12,6 +12,17 @@ exports.profile_GET = (req, res, next) => {
   return res.json({ message: "Success Profile Page" });
 };
 
+exports.user_detail_GET = (req, res, next) => {
+  User.findById(req.params.userId, "username")
+    .populate("post")
+    .populate("comment")
+    .exec((err, user) => {
+      if (err) return next(err);
+
+      return res.json({ message: "Detail user success", user });
+    });
+};
+
 /**
  *  ------ POST Logic ---------
  */
@@ -70,7 +81,7 @@ exports.login_POST = (req, res, next) => {
         res.json(err);
       }
 
-      const token = jwt.sign({ user }, "SECRET", { expiresIn: "5m" });
+      const token = jwt.sign({ user }, "SECRET", { expiresIn: "1d" });
       return res.json({ user, token });
     });
   })(req, res);

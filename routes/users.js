@@ -17,6 +17,8 @@ router.get(
   UserControl.profile_GET
 );
 
+router.get("/:userId", UserControl.user_detail_GET);
+
 /**
  *  ------- POST --------
  */

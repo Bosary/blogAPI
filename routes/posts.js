@@ -3,6 +3,7 @@ const passport = require("passport");
 const router = express.Router();
 
 const PostControl = require("../controllers/postControl");
+const CommentControl = require("../controllers/commentsControl");
 
 /**
  * ------------ GET -------------
@@ -19,9 +20,15 @@ router.get("/:postId", PostControl.singlePost_get);
  */
 
 router.post(
-  "/create",
+  "/new_post",
   passport.authenticate("jwt", { session: false }),
   PostControl.create_POST
+);
+
+router.post(
+  "/:postId",
+  passport.authenticate("jwt", { session: false }),
+  CommentControl.createComments_POST
 );
 
 module.exports = router;

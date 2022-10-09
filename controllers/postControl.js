@@ -1,7 +1,7 @@
-const passport = require("passport");
 const { body, validationResult } = require("express-validator");
 
-const Post = require("../models/posts");
+const Post = require("../models/post");
+const Comments = require("../models/comment");
 const async = require("async");
 
 /**
@@ -11,6 +11,7 @@ const async = require("async");
 exports.hotPosts_get = (req, res, next) => {
   Post.find({ likes: { $gte: 50 } })
     .sort({ createdAt: -1 })
+    .populate("author", "username")
     .exec((err, all_posts) => {
       if (err) return next(err);
 
@@ -20,7 +21,8 @@ exports.hotPosts_get = (req, res, next) => {
 
 exports.freshPosts_get = (req, res, next) => {
   Post.find({ likes: { $lt: 50 } })
-    .sort({ createdAt: "desc" })
+    .sort({ createdAt: -1 })
+    .populate("author", "username")
     .exec((err, all_posts) => {
       if (err) return next(err);
 
@@ -29,27 +31,32 @@ exports.freshPosts_get = (req, res, next) => {
 };
 
 exports.singlePost_get = (req, res, next) => {
-  async.parallel({
-    post: function (cb) {
-      Post.findById(req.params.id).exec(cb);
-    },
-    /*
-      comments: function (cb) {
-        Comments.find({ post: req.params.id }).exec(cb)
+  async.parallel(
+    {
+      post: function (cb) {
+        Post.findById(req.params.postId)
+          .populate("author", "username")
+          .exec(cb);
       },
-      */
 
-    function(err, results) {
+      comments: function (cb) {
+        Comments.find({ post: req.params.postId })
+          .populate("author", "username")
+          .sort({ likes: -1 })
+          .exec(cb);
+      },
+    },
+    function (err, results) {
       if (err) return next(err);
 
       if (results.post == null) {
-        res.status(404).json({ message: "Post not found" });
+        return res.status(404).json({ message: "Post not found" });
       }
 
       // Success
       res.json({ message: "SinglePost get", results });
-    },
-  });
+    }
+  );
 };
 
 /**

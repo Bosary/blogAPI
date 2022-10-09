@@ -6,7 +6,7 @@ const postSchema = new mongoose.Schema(
     bodyURL: { type: String, required: true },
     author: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "user",
+      ref: "User",
       required: true,
     },
     commentsCount: { type: Number, default: 0 },
@@ -15,4 +15,4 @@ const postSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-module.exports = mongoose.model("Posts", postSchema);
+module.exports = mongoose.model("Post", postSchema);
