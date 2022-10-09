@@ -72,8 +72,22 @@ exports.create_POST = [
     .withMessage("Title must be specified"),
   body("bodyURL")
     .trim()
-    .isURL()
     .escape()
+    .custom((url) => {
+      const extension = url.split(".").pop();
+      switch (extension) {
+        case "jpg":
+          return true;
+        case "jpeg":
+          return true;
+        case "gif":
+          return true;
+        case "png":
+          return true;
+        default:
+          return false;
+      }
+    })
     .withMessage("Valid URL must be specified"),
 
   // Process
@@ -96,3 +110,37 @@ exports.create_POST = [
     );
   },
 ];
+
+/**
+ * -------- PUT Logic -----------
+ */
+
+exports.like_PUT = (req, res, next) => {
+  Post.findByIdAndUpdate(req.params.postId, { $inc: { likes: 1 } }),
+    (err) => {
+      if (err) return next(err);
+
+      return res.json({ message: "Sucess likes" });
+    };
+};
+
+exports.dislike_PUT = (req, res, next) => {
+  Post.findByIdAndUpdate(req.params.postId, { $inc: { likes: -1 } }),
+    (err) => {
+      if (err) return next(err);
+
+      return res.json({ message: "Sucess dislikes" });
+    };
+};
+
+/**
+ * -------- DELETE Logic ---------
+ */
+
+exports.deletePost = (req, res, next) => {
+  Post.findByIdAndDelete(req.params.postId, (err) => {
+    if (err) return next(err);
+
+    res.json({ message: "delete post success" });
+  });
+};

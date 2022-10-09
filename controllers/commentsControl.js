@@ -39,3 +39,19 @@ exports.createComments_POST = [
     return res.json({ message: "Create comment success", comment });
   },
 ];
+
+/**
+ *  -------- PUT Logic ----------
+ */
+
+/**
+ *  --------DELETE Logic ---------
+ */
+
+exports.deleteComment = (req, res, next) => {
+  Comment.findByIdAndDelete(req.params.commentId, (err) => {
+    if (err) return next(err);
+
+    res.json({ message: "comment delete success" });
+  });
+};

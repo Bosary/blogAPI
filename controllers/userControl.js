@@ -1,5 +1,3 @@
-const passport = require("passport");
-const jwt = require("jsonwebtoken");
 const { body, validationResult } = require("express-validator");
 
 const User = require("../models/user");
@@ -67,24 +65,22 @@ exports.signup_POST = [
 ];
 
 exports.login_POST = (req, res, next) => {
-  passport.authenticate("local", { session: false }, (err, user, info) => {
-    if (err || !user) {
-      return res.status(400).json({
-        message: "Something is not right",
-        err,
-        user,
-      });
+  User.findOne({ username: req.body.username }).exec(async (err, user) => {
+    if (err) return next(err);
+
+    if (!user) return res.json({ message: "User not found" });
+
+    const validPassword = await user.isValidPassword(req.body.password);
+
+    if (!validPassword) {
+      return res.json({ message: "Incorrect password" });
     }
 
-    req.login(user, { session: false }, (err) => {
-      if (err) {
-        res.json(err);
-      }
+    // Success Login
+    const token = await user.generateToken();
 
-      const token = jwt.sign({ user }, "SECRET", { expiresIn: "1d" });
-      return res.json({ user, token });
-    });
-  })(req, res);
+    return res.json({ message: "login success", user, token });
+  });
 };
 
 /*

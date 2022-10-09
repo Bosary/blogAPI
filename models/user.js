@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
 const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
 
 /**
  * ---------- Schema ---------
@@ -18,6 +19,7 @@ const userSchema = new mongoose.Schema({
   },
   posts: [{ type: mongoose.Schema.Types.ObjectId, ref: "Post" }],
   comments: [{ type: mongoose.Schema.Types.ObjectId, ref: "Comment" }],
+  isAdmin: { type: Boolean, default: false },
 });
 
 /**
@@ -32,6 +34,19 @@ userSchema.pre("save", async function (next) {
 
 userSchema.methods.isValidPassword = async function (password) {
   return bcrypt.compare(password, this.password);
+};
+
+/**
+ *  -------- JWT Token ----------
+ */
+userSchema.methods.generateToken = function () {
+  const payloadObj = {
+    sub: this._id,
+    name: this.username,
+    admin: this.isAdmin,
+  };
+
+  return jwt.sign(payloadObj, "SECRET", { expiresIn: "1d" });
 };
 
 /**
