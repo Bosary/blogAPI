@@ -49,6 +49,10 @@ router.delete(
   CommentControl.deleteComment
 );
 
-router.delete("/:postId");
+router.delete(
+  "/:postId",
+  [passport.authenticate("jwt", { session: false }), checkAdmin],
+  PostControl.deletePost
+);
 
 module.exports = router;
