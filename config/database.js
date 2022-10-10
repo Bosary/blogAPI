@@ -1,9 +1,7 @@
 const mongoose = require("mongoose");
 
 // Setting up connection to mongoDB
-const uri =
-  "mongodb+srv://admin:Admin123@authcluster.q6eemb8.mongodb.net/Blog?retryWrites=true&w=majority";
-const mongoDB = uri;
+const mongoDB = process.env.MONGO_URL;
 
 mongoose.connect(mongoDB, {
   useNewUrlParser: true,

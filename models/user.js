@@ -46,7 +46,7 @@ userSchema.methods.generateToken = function () {
     admin: this.isAdmin,
   };
 
-  return jwt.sign(payloadObj, "SECRET", { expiresIn: "1d" });
+  return jwt.sign(payloadObj, process.env.SECRET_KEY, { expiresIn: "1d" });
 };
 
 /**
