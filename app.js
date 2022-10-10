@@ -27,7 +27,7 @@ const indexRouter = require("./routes/index");
 const postsRouter = require("./routes/posts");
 const usersRouter = require("./routes/users");
 
-app.use("/api/", indexRouter); // Redirect to '/posts', necessary to avoid CastError
+app.use("/", indexRouter); // Redirect to '/posts', necessary to avoid CastError
 app.use("/posts", postsRouter);
 app.use("/users", usersRouter);
 
