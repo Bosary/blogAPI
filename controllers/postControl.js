@@ -72,7 +72,7 @@ exports.create_POST = [
     .withMessage("Title must be specified"),
   body("bodyURL")
     .trim()
-    .escape()
+    // .escape()  Temporaly remove until I figure out how to upload image
     .custom((url) => {
       const extension = url.split(".").pop();
       switch (extension) {
