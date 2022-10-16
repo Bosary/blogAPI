@@ -1,0 +1,3 @@
+Dummy text to upload file on GitHub/Heroku because an empty
+file would be ignored.
+"uploads" file necessary to use multer with images
