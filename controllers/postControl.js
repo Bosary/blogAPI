@@ -50,11 +50,15 @@ exports.singlePost_get = (req, res, next) => {
       if (err) return next(err);
 
       if (results.post == null) {
-        return res.status(404).json({ message: "Post not found" });
+        return res.status(404).send("Post not found");
       }
 
       // Success
-      res.json({ message: "SinglePost get", results });
+      res.json({
+        message: "SinglePost get",
+        post: results.post,
+        comments: results.comments,
+      });
     }
   );
 };
@@ -75,14 +79,12 @@ exports.create_POST = [
   (req, res, next) => {
     // FILE EXTENSION ERROR
     if (req.fileTypeInvalid) {
-      return res.json({ message: "Invalid format" });
+      return res.status(400).send("Invalid Image Format");
     }
 
     const errors = validationResult(req);
 
-    if (!errors.isEmpty()) return res.json({ error: errors });
-
-    console.log(req.file);
+    if (!errors.isEmpty()) return res.status(400).send(errors);
 
     Post.create(
       {

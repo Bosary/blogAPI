@@ -49,7 +49,7 @@ router.get("/:postId", PostControl.singlePost_get);
 
 router.post(
   "/new_post",
-  [passport.authenticate("jwt", { session: false }), upload.single("bodyURL")],
+  [passport.authenticate("jwt", { session: false }), upload.single("image")],
   PostControl.create_POST
 );
 
