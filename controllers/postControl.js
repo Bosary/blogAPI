@@ -70,36 +70,24 @@ exports.create_POST = [
     .isLength({ min: 1 })
     .escape()
     .withMessage("Title must be specified"),
-  body("bodyURL")
-    .trim()
-    // .escape()  Temporaly remove until I figure out how to upload image
-    .custom((url) => {
-      const extension = url.split(".").pop();
-      switch (extension) {
-        case "jpg":
-          return true;
-        case "jpeg":
-          return true;
-        case "gif":
-          return true;
-        case "png":
-          return true;
-        default:
-          return false;
-      }
-    })
-    .withMessage("Valid URL must be specified"),
 
   // Process
   (req, res, next) => {
+    // FILE EXTENSION ERROR
+    if (req.fileTypeInvalid) {
+      return res.json({ message: "Invalid format" });
+    }
+
     const errors = validationResult(req);
 
     if (!errors.isEmpty()) return res.json({ error: errors });
 
+    console.log(req.file);
+
     Post.create(
       {
         title: req.body.title,
-        bodyURL: req.body.bodyURL,
+        image: req.file.filename,
         author: req.user._id,
       },
       (err, post) => {
