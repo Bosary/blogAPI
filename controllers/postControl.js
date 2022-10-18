@@ -1,33 +1,29 @@
+const async = require("async");
+const sharp = require("sharp");
 const { body, validationResult } = require("express-validator");
 
 const Post = require("../models/post");
 const Comments = require("../models/comment");
-const async = require("async");
 
+const S3 = require("../config/s3");
 /**
  * ------- GET Logic ----------
  */
 
-exports.hotPosts_get = (req, res, next) => {
-  Post.find({ likes: { $gte: 50 } })
+exports.allPosts_GET = async (req, res, next) => {
+  const posts = await Post.find()
     .sort({ createdAt: -1 })
-    .populate("author", "username")
-    .exec((err, all_posts) => {
-      if (err) return next(err);
+    .populate("author", "username");
+  // .exec(async function (err) {
+  //   if (err) {
+  //     return next(err);
+  //   }
 
-      res.json({ all_posts, message: "Hot posts" });
-    });
-};
+  for (let post of posts) {
+    post.imageUrl = await S3.getObjectSignedUrl(post.imageName);
+  }
 
-exports.freshPosts_get = (req, res, next) => {
-  Post.find({ likes: { $lt: 50 } })
-    .sort({ createdAt: -1 })
-    .populate("author", "username")
-    .exec((err, all_posts) => {
-      if (err) return next(err);
-
-      res.json({ all_posts, message: "Fresh posts" });
-    });
+  res.json({ posts, message: "All posts" });
 };
 
 exports.singlePost_get = (req, res, next) => {
@@ -46,7 +42,7 @@ exports.singlePost_get = (req, res, next) => {
           .exec(cb);
       },
     },
-    function (err, results) {
+    async function (err, results) {
       if (err) return next(err);
 
       if (results.post == null) {
@@ -54,6 +50,10 @@ exports.singlePost_get = (req, res, next) => {
       }
 
       // Success
+      results.post.imageUrl = await S3.getObjectSignedUrl(
+        results.post.imageName
+      );
+
       res.json({
         message: "SinglePost get",
         post: results.post,
@@ -75,21 +75,30 @@ exports.create_POST = [
     .escape()
     .withMessage("Title must be specified"),
 
-  // Process
-  (req, res, next) => {
-    // FILE EXTENSION ERROR
-    if (req.fileTypeInvalid) {
-      return res.status(400).send("Invalid Image Format");
-    }
-
+  async (req, res, next) => {
+    // Verification Process
     const errors = validationResult(req);
 
     if (!errors.isEmpty()) return res.status(400).send(errors);
 
+    /* Image process */
+    // multer
+    const file = req.file;
+    const imageName = file.filename + "-" + Date.now().toString();
+
+    // re-sizing image
+    const fileBuffer = await sharp(file.buffer)
+      .resize({ height: 720, width: 1280, fit: "contain" })
+      .toBuffer();
+
+    // upload to s3
+    await S3.uploadFile(fileBuffer, imageName, file.mimetype);
+
+    // upload to db
     Post.create(
       {
         title: req.body.title,
-        image: req.file.filename,
+        imageName: imageName,
         author: req.user._id,
       },
       (err, post) => {
@@ -127,10 +136,13 @@ exports.dislike_PUT = (req, res, next) => {
  * -------- DELETE Logic ---------
  */
 
-exports.deletePost = (req, res, next) => {
-  Post.findByIdAndDelete(req.params.postId, (err) => {
-    if (err) return next(err);
+exports.deletePost = async (req, res, next) => {
+  const id = req.params.postId;
 
-    res.json({ message: "delete post success" });
-  });
+  const post = await Post.findByIdAndDelete({ _id: id });
+
+  if (!post) return res.json("message: post not found");
+  await S3.deleteFile(post.imageName);
+
+  res.json({ message: "delete post success" });
 };

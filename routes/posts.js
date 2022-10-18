@@ -1,45 +1,20 @@
+/* Express */
 const express = require("express");
 const passport = require("passport");
-const multer = require("multer");
 const router = express.Router();
 
+/* Controller */
 const PostControl = require("../controllers/postControl");
 const CommentControl = require("../controllers/commentsControl");
+
+/* Config */
 const checkAdmin = require("../config/admin").checkAdmin;
-
-/**
- *  -------------- Multer Config ---------
- */
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, "uploads/");
-  },
-  filename: function (req, file, cb) {
-    cb(null, file.fieldname + "-" + Date.now());
-  },
-});
-
-const fileFilter = (req, file, cb) => {
-  if (file.mimetype === "image/jpeg" || file.mimetype === "image/png") {
-    cb(null, true);
-  } else {
-    cb(new Error("Invalid format"), false);
-  }
-};
-
-const upload = multer({
-  limits: { fileSize: 1024 * 1024 },
-  fileFilter: fileFilter,
-  storage: storage,
-});
-
+const upload = require("../config/multer");
 /**
  * ------------ GET -------------
  */
 
-router.get("/", PostControl.hotPosts_get);
-
-router.get("/fresh", PostControl.freshPosts_get);
+router.get("/", PostControl.allPosts_GET);
 
 router.get("/:postId", PostControl.singlePost_get);
 
