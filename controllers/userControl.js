@@ -46,9 +46,10 @@ exports.signup_POST = [
     if (!errors.isEmpty()) return res.json({ error: errors });
 
     User.findOne({ username: req.body.username }, (err, found_user) => {
-      if (err) return res.json({ error: err });
+      if (err) return res.status(500).json({ error: err });
 
-      if (found_user) return res.json({ message: "User already exist" });
+      if (found_user)
+        return res.status(400).json({ message: "User already exist" });
 
       const user = new User({
         username: req.body.username,
@@ -67,9 +68,9 @@ exports.signup_POST = [
 
 exports.login_POST = (req, res, next) => {
   User.findOne({ username: req.body.username }).exec(async (err, user) => {
-    if (err) return next(err);
+    if (err) return res.status(500).json({ message: err });
 
-    if (!user) return res.json({ message: "User not found" });
+    if (!user) return res.status(400).json({ message: "User not found" });
 
     const validPassword = await user.isValidPassword(req.body.password);
 
