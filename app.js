@@ -15,7 +15,14 @@ require("./config/database");
  */
 const app = express();
 
-app.use(cors({ origin: "http://localhost:3000" }));
+const corsOptions = {
+  origin: "*",
+  methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
+  preflightContinue: false,
+  optionsSuccessStatus: 204,
+};
+
+app.use(cors(corsOptions));
 app.use(helmet());
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
