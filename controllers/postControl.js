@@ -38,7 +38,7 @@ exports.singlePost_get = (req, res, next) => {
       comments: function (cb) {
         Comments.find({ post: req.params.postId })
           .populate("author", "username")
-          .sort({ likes: -1 })
+          .sort({ likes: -1, createdAt: -1 })
           .exec(cb);
       },
     },
