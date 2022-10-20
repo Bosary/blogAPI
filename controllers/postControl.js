@@ -115,21 +115,19 @@ exports.create_POST = [
  */
 
 exports.like_PUT = (req, res, next) => {
-  Post.findByIdAndUpdate(req.params.postId, { $inc: { likes: 1 } }),
-    (err) => {
-      if (err) return next(err);
+  Post.findByIdAndUpdate(req.params.postId, { $inc: { likes: 1 } }, (err) => {
+    if (err) return next(err);
 
-      return res.json({ message: "Sucess likes" });
-    };
+    return res.json({ message: "Sucess likes" });
+  });
 };
 
 exports.dislike_PUT = (req, res, next) => {
-  Post.findByIdAndUpdate(req.params.postId, { $inc: { likes: -1 } }),
-    (err) => {
-      if (err) return next(err);
+  Post.findByIdAndUpdate(req.params.postId, { $inc: { likes: -1 } }, (err) => {
+    if (err) return next(err);
 
-      return res.json({ message: "Sucess dislikes" });
-    };
+    return res.json({ message: "Sucess dislikes" });
+  });
 };
 
 /**
