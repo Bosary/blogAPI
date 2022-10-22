@@ -88,7 +88,7 @@ exports.create_POST = [
 
     // re-sizing image
     const fileBuffer = await sharp(file.buffer)
-      .resize({ height: 1280, width: 720, fit: "contain" })
+      .resize({ height: 900, width: 1600, fit: "contain" })
       .toBuffer();
 
     // upload to s3
