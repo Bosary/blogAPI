@@ -43,13 +43,13 @@ exports.signup_POST = [
   (req, res, next) => {
     const errors = validationResult(req);
 
-    if (!errors.isEmpty()) return res.json({ error: errors });
+    if (!errors.isEmpty()) return res.status(400).send(errors.array());
 
     User.findOne({ username: req.body.username }, (err, found_user) => {
-      if (err) return res.status(500).json({ error: err });
+      if (err) return res.status(500).send({ error: err });
 
       if (found_user)
-        return res.status(400).json({ message: "User already exist" });
+        return res.status(400).send({ message: "User already exist" });
 
       const user = new User({
         username: req.body.username,
@@ -58,32 +58,50 @@ exports.signup_POST = [
 
       // Password secured logic in userSchema
       user.save((err) => {
-        if (err) return next(err);
+        if (err) return res.status(500).send({ error: err });
       });
 
-      return res.json({ message: "SignUp Success", user });
+      return res.status(200).json({ message: "SignUp Success", user });
     });
   },
 ];
 
-exports.login_POST = (req, res, next) => {
-  User.findOne({ username: req.body.username }).exec(async (err, user) => {
-    if (err) return res.status(500).json({ message: err });
+exports.login_POST = [
+  // Validation and sanitation
+  body("username")
+    .trim()
+    .isLength({ min: 1 })
+    .escape()
+    .withMessage("Username must be specified"),
+  body("password")
+    .trim()
+    .isLength({ min: 3 })
+    .escape()
+    .withMessage("Password must contains at least 3 characters"),
 
-    if (!user) return res.status(400).json({ message: "User not found" });
+  (req, res, next) => {
+    const errors = validationResult(req);
 
-    const validPassword = await user.isValidPassword(req.body.password);
+    if (!errors.isEmpty()) return res.status(400).send(errors.array());
 
-    if (!validPassword) {
-      return res.json({ message: "Incorrect password" });
-    }
+    User.findOne({ username: req.body.username }).exec(async (err, user) => {
+      if (err) return res.status(500).send({ error: err });
 
-    // Success Login
-    const token = await user.generateToken();
+      if (!user) return res.status(400).send({ message: "User not found" });
 
-    return res.json({ message: "login success", user, token });
-  });
-};
+      const validPassword = await user.isValidPassword(req.body.password);
+
+      if (!validPassword) {
+        return res.status(400).send({ message: "Incorrect password" });
+      }
+
+      // Success Login
+      const token = await user.generateToken();
+
+      return res.json({ message: "login success", user, token });
+    });
+  },
+];
 
 /*
 
