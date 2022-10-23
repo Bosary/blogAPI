@@ -51,7 +51,7 @@ exports.signup_POST = [
       if (found_user)
         return res
           .status(400)
-          .send({ param: "username", msg: "User already exist" });
+          .send([{ param: "username", msg: "User already exist" }]);
 
       const user = new User({
         username: req.body.username,
@@ -99,7 +99,7 @@ exports.login_POST = [
       if (!validPassword) {
         return res
           .status(400)
-          .send({ param: "password", msg: "Incorrect password" });
+          .send([{ param: "password", msg: "Incorrect password" }]);
       }
 
       // Success Login
