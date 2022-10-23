@@ -1,6 +1,6 @@
 const async = require("async");
 const sharp = require("sharp");
-const { body, validationResult } = require("express-validator");
+const { body, validationResult, check } = require("express-validator");
 
 const Post = require("../models/post");
 const Comments = require("../models/comment");
@@ -79,11 +79,32 @@ exports.create_POST = [
     // Verification Process
     const errors = validationResult(req);
 
-    if (!errors.isEmpty()) return res.status(400).send(errors);
+    /**
+     *  Move validation config ?
+     */
 
-    /* Image process */
     // multer
     const file = req.file;
+
+    // File errors check
+    if (file === undefined) {
+      errors.errors.push({ msg: "File must be specified", param: "file" });
+    } else if (
+      file.mimetype !== "image/jpeg" ||
+      file.mimetype !== "image/png"
+    ) {
+      errors.errors.push({
+        msg: "Extensions accepted are: .png, .jpg, .jpeg",
+        param: "file",
+      });
+    } else if (file.size > 1024 * 1024) {
+      errors.errors.push({ msg: "File size must be below 1MB", param: "file" });
+    }
+
+    if (!errors.isEmpty()) return res.status(400).send(errors.array());
+
+    /* Image process on success*/
+
     const imageName = file.filename + "-" + Date.now().toString();
 
     // re-sizing image
