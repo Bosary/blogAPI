@@ -92,7 +92,7 @@ exports.login_POST = [
       if (!user)
         return res
           .status(400)
-          .send({ param: "username", msg: "User not found" });
+          .send([{ param: "username", msg: "User not found" }]);
 
       const validPassword = await user.isValidPassword(req.body.password);
 
