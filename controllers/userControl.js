@@ -49,7 +49,9 @@ exports.signup_POST = [
       if (err) return res.status(500).send({ error: err });
 
       if (found_user)
-        return res.status(400).send({ message: "User already exist" });
+        return res
+          .status(400)
+          .send({ param: "username", msg: "User already exist" });
 
       const user = new User({
         username: req.body.username,
@@ -87,12 +89,17 @@ exports.login_POST = [
     User.findOne({ username: req.body.username }).exec(async (err, user) => {
       if (err) return res.status(500).send({ error: err });
 
-      if (!user) return res.status(400).send({ message: "User not found" });
+      if (!user)
+        return res
+          .status(400)
+          .send({ param: "username", msg: "User not found" });
 
       const validPassword = await user.isValidPassword(req.body.password);
 
       if (!validPassword) {
-        return res.status(400).send({ message: "Incorrect password" });
+        return res
+          .status(400)
+          .send({ param: "password", msg: "Incorrect password" });
       }
 
       // Success Login
