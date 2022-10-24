@@ -85,12 +85,12 @@ exports.create_POST = [
 
     // multer
     const file = req.file;
-
+    console.log(file.mimetype);
     // File errors check
     if (file === undefined) {
       errors.errors.push({ msg: "File must be specified", param: "file" });
     } else if (
-      file.mimetype !== "image/jpeg" ||
+      file.mimetype !== "image/jpeg" &&
       file.mimetype !== "image/png"
     ) {
       errors.errors.push({
